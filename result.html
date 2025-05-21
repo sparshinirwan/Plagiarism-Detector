@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plagiarism Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        h2 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid;
+        }
+        
+        .plagiarism {
+            border-color: var(--danger);
+            background: linear-gradient(to right, #fff5f7, white);
+        }
+        
+        .no-plagiarism {
+            border-color: var(--success);
+            background: linear-gradient(to right, #f0fdfd, white);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .status {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .similarity-score {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .plagiarism .similarity-score {
+            color: var(--danger);
+        }
+        
+        .no-plagiarism .similarity-score {
+            color: var(--success);
+        }
+        
+        .feedback-card {
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .feedback-title {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .feedback-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .group-results {
+            margin-top: 30px;
+        }
+        
+        .group-header {
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .comparison-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            background: var(--light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .files {
+            flex: 1;
+        }
+        
+        .score {
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .high-similarity {
+            color: var(--danger);
+        }
+        
+        .medium-similarity {
+            color: var(--warning);
+        }
+        
+        .low-similarity {
+            color: var(--success);
+        }
+        
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .back-btn:hover {
+            color: #3a56d4;
+            text-decoration: underline;
+        }
+        
+        .result-details {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Plagiarism Analysis Results</h2>
+        
+        {% if group_results %}
+            <div class="group-results">
+                <h3 class="group-header">Document Comparison Results</h3>
+                {% for result in group_results %}
+                    <div class="comparison-item">
+                        <div class="files">
+                            <strong>{{ result.file1 }}</strong> vs
+                            <strong>{{ result.file2 }}</strong>
+                        </div>
+                        <div class="score
+                            {% if result.score > 50 %}high-similarity
+                            {% elif result.score > 25 %}medium-similarity
+                            {% else %}low-similarity{% endif %}">
+                            {{ result.score }}%
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="result-details">
+                    <p>Note: Scores above 50% indicate significant similarity, between 25-50% suggest moderate similarity, and below 25% show minimal similarity.</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="result-card {% if status == 'Plagiarism Detected' %}plagiarism{% else %}no-plagiarism{% endif %}">
+                <div class="result-header">
+                    <span class="status">{{ status }}</span>
+                    <span class="similarity-score">{{ similarity }}%</span>
+                </div>
+                {% if status == 'Plagiarism Detected' %}
+                    <p>The analysis found significant matches with existing sources.</p>
+                {% else %}
+                    <p>No significant plagiarism was detected in the content.</p>
+                {% endif %}
+            </div>
+            
+            <div class="feedback-card">
+                <div class="feedback-title">AI Feedback</div>
+                <div class="feedback-content">{{ feedback }}</div>
+            </div>
+        {% endif %}
+        
+        <a href="/" class="back-btn">← Analyze another document</a>
+    </div>
+</body>
+</html>
